@@ -84,4 +84,81 @@ router.put("/updateDetails/:id", authguard, async (req, res, next) => {
   );
   res.json({ message: "Successfully updated" });
 });
-
+/**
+ * method : POST
+ * url : /addmember
+ */
+router.post("/addMember", authguard, async (req, res, next) => {
+  let addedBy = req.authUserData.id;
+  await db.any(
+    "INSERT INTO members(firstname, lastname , address, phone, email , addedBy) VALUES( $<firstname> , $<lastname>,  $<address>, $<phone>, $<email> , $<addedby>);",
+    {
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      address: req.body.address,
+      phone: req.body.phone,
+      email: req.body.email,
+      addedby: addedBy,
+    }
+  );
+  res.json({ error: null, message: "Added member successfully" });
+});
+/**
+ * method : PUT
+ * url : /updateMember/:id
+ */
+router.put("/updateMember/:id", authguard, async (req, res, next) => {
+  let data = await db.any(
+    "SELECT * FROM members WHERE id = $1 AND addedby = $2 ",
+    [req.params.id, req.authUserData.id]
+  );
+  if (!data.length) {
+    return res.json({
+      message: "Cannot update another user member data",
+      error: true,
+    });
+  }
+  data = data[0];
+  let dataToUpdate = {
+    firstname: req.body.firstname ? req.body.firstname : data.firstname,
+    lastname: req.body.lastname ? req.body.lastname : data.lastname,
+    address: req.body.address ? req.body.address : data.address,
+    phone: req.body.phone ? req.body.phone : data.phone,
+    email: req.body.email ? req.body.email : data.email,
+  };
+  await db.any(
+    "UPDATE members SET firstname = $<firstname> , lastname = $<lastname> , address = $<address> , phone = $<phone> , email = $<email>",
+    dataToUpdate
+  );
+  res.json({ message: "Updated successfully", error: null });
+});
+/**
+ * method : DELETE
+ * url : /deleteMember/:id
+ */
+router.delete("/deleteMembers/:id", authguard, async (req, res, next) => {
+  let data = await db.any(
+    "SELECT * FROM members WHERE id = $1 AND addedby = $2 ",
+    [req.params.id, req.authUserData.id]
+  );
+  if (!data.length) {
+    return res.json({
+      error: true,
+      message: "Cannot delete another user's data",
+    });
+  }
+  await db.any("DELETE FROM members WHERE id = $1 ", req.params.id);
+  res.json({ message: "Deleted successfully", error: null });
+});
+/**
+ * method : DELETE
+ * url : /getAllMembers
+ */
+router.get("/getAllMembers", authguard, async (req, res, next) => {
+  let data = await db.any(
+    "SELECT * FROM members WHERE addedby = $1 ",
+    req.authUserData.id
+  );
+  res.json({ data: data, error: null });
+});
+module.exports = router;
