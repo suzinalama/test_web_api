@@ -18,7 +18,7 @@ router.post("/register", async (req, res, next) => {
       req.body.email
     );
     if (data.length > 0) {
-      return res.json({ message: "Registered using same email" });
+      return res.json({ message: "Already registered using same email" });
     }
     await db.any(
       "INSERT INTO alluser(firstName , lastName , email , pass) VALUES($<firstName> , $<lastName>, $<email> , $<password>);",
@@ -68,9 +68,12 @@ router.get("/getDetails", authguard, async (req, res, next) => {
  * url : /updateDetails
  */
 router.put("/updateDetails/:id", authguard, async (req, res, next) => {
+  if (req.params.id != req.authUserData.id) {
+    return res.json({ message: "Cannot update another user details" });
+  }
   let data = await db.any("SELECT * FROM alluser WHERE id = $1", req.params.id);
   if (!data.length) {
-    return res.json({ message: "No data to update" });
+    return res.json({ message: "No data found to update" });
   }
   data = data[0];
   let dataToUpdate = {
@@ -82,7 +85,7 @@ router.put("/updateDetails/:id", authguard, async (req, res, next) => {
     "UPDATE alluser SET firstname = $<firstname> , lastname = $<lastname> , email = $<email>",
     dataToUpdate
   );
-  res.json({ message: "Successfully updated" });
+  res.json({ message: "updated" });
 });
 /**
  * method : POST
@@ -91,7 +94,7 @@ router.put("/updateDetails/:id", authguard, async (req, res, next) => {
 router.post("/addMember", authguard, async (req, res, next) => {
   let addedBy = req.authUserData.id;
   await db.any(
-    "INSERT INTO members(firstname, lastname , address, phone, email , addedBy) VALUES( $<firstname> , $<lastname>,  $<address>, $<phone>, $<email> , $<addedby>);",
+    "INSERT INTO members(firstname , lastname , address , phone, email , addedBy) VALUES($<firstname> , $<lastname>, $<address>, $<phone>, $<email> , $<addedby>);",
     {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
@@ -101,7 +104,7 @@ router.post("/addMember", authguard, async (req, res, next) => {
       addedby: addedBy,
     }
   );
-  res.json({ error: null, message: "Added member successfully" });
+  res.json({ error: null, message: "Added new member successfully" });
 });
 /**
  * method : PUT
@@ -114,7 +117,7 @@ router.put("/updateMember/:id", authguard, async (req, res, next) => {
   );
   if (!data.length) {
     return res.json({
-      message: "Cannot update another user member data",
+      message: "Cannot update another user member's data",
       error: true,
     });
   }
@@ -127,7 +130,7 @@ router.put("/updateMember/:id", authguard, async (req, res, next) => {
     email: req.body.email ? req.body.email : data.email,
   };
   await db.any(
-    "UPDATE members SET firstname = $<firstname> , lastname = $<lastname> , address = $<address> , phone = $<phone> , email = $<email>",
+    "UPDATE members SET firstname = $<firstname> , lastname = $<lastname> , address = $<address> , phone = $<phone>, email = $<email>",
     dataToUpdate
   );
   res.json({ message: "Updated successfully", error: null });
