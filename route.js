@@ -6,6 +6,7 @@ const authguard = require("./middleware/authguard");
 /**
  * method : POST
  * url : /register
+ * to register new user
  */
 router.post("/register", async (req, res, next) => {
   try {
@@ -37,6 +38,7 @@ router.post("/register", async (req, res, next) => {
 /**
  * method : POST
  * url : /login
+ * to login as the existing user
  */
 router.post("/login", async (req, res, next) => {
   let data = await db.any(
@@ -56,6 +58,7 @@ router.post("/login", async (req, res, next) => {
 /**
  * method : GET
  * url : /getDetails
+ * to view existing user details
  */
 router.get("/getDetails", authguard, async (req, res, next) => {
   let email = req.authUserData.email;
@@ -66,6 +69,7 @@ router.get("/getDetails", authguard, async (req, res, next) => {
 /**
  * method : PUT
  * url : /updateDetails
+ * to update user details
  */
 router.put("/updateDetails/:id", authguard, async (req, res, next) => {
   if (req.params.id != req.authUserData.id) {
@@ -90,6 +94,7 @@ router.put("/updateDetails/:id", authguard, async (req, res, next) => {
 /**
  * method : POST
  * url : /addmember
+ * to add new member by the user
  */
 router.post("/addMember", authguard, async (req, res, next) => {
   let addedBy = req.authUserData.id;
@@ -109,6 +114,7 @@ router.post("/addMember", authguard, async (req, res, next) => {
 /**
  * method : PUT
  * url : /updateMember/:id
+ * to update members details by its user
  */
 router.put("/updateMember/:id", authguard, async (req, res, next) => {
   let data = await db.any(
@@ -138,6 +144,7 @@ router.put("/updateMember/:id", authguard, async (req, res, next) => {
 /**
  * method : DELETE
  * url : /deleteMember/:id
+ * to delete member by the user
  */
 router.delete("/deleteMembers/:id", authguard, async (req, res, next) => {
   let data = await db.any(
@@ -156,6 +163,7 @@ router.delete("/deleteMembers/:id", authguard, async (req, res, next) => {
 /**
  * method : DELETE
  * url : /getAllMembers
+ * to get all the members details of the specific user
  */
 router.get("/getAllMembers", authguard, async (req, res, next) => {
   let data = await db.any(

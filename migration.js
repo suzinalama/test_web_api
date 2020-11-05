@@ -1,4 +1,5 @@
 const db = require("./dbconnection");
+//creating members table if it doesnot exists
 let sqlForMembers = `CREATE TABLE IF NOT EXISTS members(
   id serial PRIMARY KEY NOT NULL,
   firstname VARCHAR(255) NOT NULL,
@@ -9,6 +10,8 @@ let sqlForMembers = `CREATE TABLE IF NOT EXISTS members(
   addedby BIGINT NOT NULL,
   FOREIGN KEY (addedby) References alluser(id)
 )`;
+
+//creating alluser table if it doesnot exists
 let sqlForAllUsers = `
 CREATE TABLE IF NOT EXISTS alluser(
 	id serial NOT NULL PRIMARY KEY,

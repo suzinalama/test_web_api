@@ -6,6 +6,7 @@ module.exports = async (req, res, next) => {
   req.authUserData = data.data;
   next();
 };
+//to check whether the token mathes or not
 var verifyToken = async (token) => {
   const jwt = require("jsonwebtoken");
   if (typeof token === "undefined") {
